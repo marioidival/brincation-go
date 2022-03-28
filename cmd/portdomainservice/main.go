@@ -9,6 +9,9 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/marioidival/brincation-go/internal/server/portdomainservice"
+	rpc "github.com/marioidival/brincation-go/rpc"
 )
 
 func main() {
@@ -20,6 +23,13 @@ func main() {
 
 func run() error {
 	var handler http.Handler
+
+	portDomainServer, err := portdomainservice.NewServer()
+	if err != nil {
+		return err
+	}
+	handler = rpc.NewPortServiceServer(portDomainServer)
+
 	server := &http.Server{
 		Addr:    os.Getenv("PORT"),
 		Handler: handler,

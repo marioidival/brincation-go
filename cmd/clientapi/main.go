@@ -2,15 +2,20 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"io"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
 	"github.com/gorilla/mux"
+	rpc "github.com/marioidival/brincation-go/rpc"
+	"github.com/mitchellh/mapstructure"
 )
 
 func main() {
@@ -19,7 +24,42 @@ func main() {
 	}
 }
 
+func loadPorts(client rpc.PortService, path string) {
+	f, err := os.Open(path)
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+	defer f.Close()
+
+	dec := json.NewDecoder(f)
+	for dec.More() {
+		m := make(map[string]interface{}, 0)
+		if err := dec.Decode(&m); err == io.EOF {
+			break
+		} else if err != nil {
+			log.Println(err.Error())
+			continue
+		}
+
+		for k, v := range m {
+			var o rpc.Port
+			mapstructure.Decode(v, &o)
+			o.Id = k
+			_, err := client.CreatePort(context.Background(), &o)
+			if err != nil {
+				log.Println(err.Error())
+				continue
+			}
+		}
+	}
+}
+
 func run() error {
+	client := rpc.NewPortServiceProtobufClient(os.Getenv("PORTS_SERVICE_URL"), &http.Client{})
+
+	go loadPorts(client, os.Getenv("PORTS_FILE"))
+
 	router := mux.NewRouter()
 	router.HandleFunc("/get-port/{id}", func(w http.ResponseWriter, r *http.Request) {
 	}).Methods("GET")
