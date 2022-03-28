@@ -37,3 +37,42 @@ func (mem *MemClient) GetOrCreate(key string, value *rpc.Port) *rpc.Port {
 	}
 	return v
 }
+
+func (mem *MemClient) Update(key string, updatedValue *rpc.Port) (*rpc.Port, error) {
+	currentValue, err := mem.Get(key)
+	if err != nil {
+		return nil, err
+	}
+	mem.Lock()
+	defer mem.Unlock()
+
+	if updatedValue.Name != "" {
+		currentValue.Name = updatedValue.Name
+	}
+	if updatedValue.Country != "" {
+		currentValue.Country = updatedValue.Country
+	}
+	if updatedValue.Province != "" {
+		currentValue.Province = updatedValue.Province
+	}
+	if updatedValue.Timezone != "" {
+		currentValue.Timezone = updatedValue.Timezone
+	}
+	if updatedValue.Code != "" {
+		currentValue.Code = updatedValue.Code
+	}
+	if updatedValue.Alias != nil {
+		currentValue.Alias = updatedValue.Alias
+	}
+	if updatedValue.Regions != nil {
+		currentValue.Regions = updatedValue.Regions
+	}
+	if updatedValue.Coordinates != nil {
+		currentValue.Coordinates = updatedValue.Coordinates
+	}
+	if updatedValue.Unlocs != nil {
+		currentValue.Unlocs = updatedValue.Unlocs
+	}
+	mem.m[key] = currentValue
+	return currentValue, nil
+}
