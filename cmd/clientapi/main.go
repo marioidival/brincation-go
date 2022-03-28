@@ -34,7 +34,7 @@ func loadPorts(client rpc.PortService, path string) {
 
 	dec := json.NewDecoder(f)
 	for dec.More() {
-		m := make(map[string]interface{}, 0)
+		m := make(map[string]interface{})
 		if err := dec.Decode(&m); err == io.EOF {
 			break
 		} else if err != nil {
@@ -44,7 +44,11 @@ func loadPorts(client rpc.PortService, path string) {
 
 		for k, v := range m {
 			var o rpc.Port
-			mapstructure.Decode(v, &o)
+			err = mapstructure.Decode(v, &o)
+			if err != nil {
+				log.Println(err.Error())
+				continue
+			}
 			o.Id = k
 			_, err := client.CreatePort(context.Background(), &o)
 			if err != nil {
@@ -69,12 +73,20 @@ func run() error {
 		})
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(w).Encode(rpc.Port{})
+			err = json.NewEncoder(w).Encode(rpc.Port{})
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
 			return
 		}
 
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(port)
+		err = json.NewEncoder(w).Encode(port)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}).Methods("GET")
 
 	server := &http.Server{
