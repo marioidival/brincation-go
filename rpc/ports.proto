@@ -7,6 +7,7 @@ option go_package = "github.com/marioidival/brincation-go/rpc/ports";
 service PortService {
     rpc GetPort(PortId) returns (Port);
     rpc CreatePort(Port) returns (Port);
+    rpc UpdatePort(UpdatePortRequest) returns (Port);
 }
 
 message Port {
@@ -25,4 +26,9 @@ message Port {
 
 message PortId {
     string id = 1;
+}
+
+message UpdatePortRequest {
+    string id = 1;
+    Port port = 2;
 }
