@@ -47,7 +47,7 @@ This folder we build the memory database used by portdomainservice.
 This folder we build the .proto file used by portdomainservice. Here is only allowed edit the .proto file. The *pb.go and *twirp.go are build using this command:
 
 ```bash
-$ protoc --go_out=. --twirp_out=. rpc/ports.proto
+$ protoc --go_out=paths=source_relative:. --twirp_out=paths=source_relative:. rpc/ports.proto
 ```
 
 
