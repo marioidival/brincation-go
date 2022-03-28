@@ -1,0 +1,23 @@
+version: "3.9"
+services:
+  clientapi:
+    container_name: client-api
+    build: ./
+    command: ./clientapi
+    environment:
+      PORTS_FILE: ./ports.json
+      PORTS_SERVICE_URL: http://portservice:5001
+      PORT: ":6001"
+    ports:
+      - "6001:6001"
+    links:
+      - "portdomainservice:portservice"
+
+  portdomainservice:
+    container_name: port-domain-service
+    build: ./
+    command: ./portdomainservice
+    environment:
+      PORT: ":5001"
+    ports:
+      - "5001:5001"
