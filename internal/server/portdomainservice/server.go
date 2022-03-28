@@ -18,7 +18,7 @@ func NewServer() (*Server, error) {
 }
 
 func (s *Server) GetPort(ctx context.Context, portId *rpc.PortId) (*rpc.Port, error) {
-	port, err := s.repo.GetPort(portId.GetId())
+	port, err := s.repo.GetPort(ctx, portId.GetId())
 	if err != nil {
 		return nil, err
 	}
@@ -26,5 +26,9 @@ func (s *Server) GetPort(ctx context.Context, portId *rpc.PortId) (*rpc.Port, er
 }
 
 func (s *Server) CreatePort(ctx context.Context, newPort *rpc.Port) (*rpc.Port, error) {
-	return s.repo.CreatePort(newPort), nil
+	return s.repo.CreatePort(ctx, newPort), nil
+}
+
+func (s *Server) UpdatePort(ctx context.Context, req *rpc.UpdatePortRequest) (*rpc.Port, error) {
+	return s.repo.UpdatePort(ctx, req)
 }

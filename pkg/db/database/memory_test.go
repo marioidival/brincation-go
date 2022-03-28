@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"testing"
 
 	rpc "github.com/marioidival/brincation-go/rpc"
@@ -11,7 +12,7 @@ func TestGet(t *testing.T) {
 	db := NewMemoryDatabase()
 	key := "my-id"
 
-	savedValue, err := db.Get(key)
+	savedValue, err := db.Get(context.Background(), key)
 	assert.ErrorIs(t, err, DbNotFound)
 	assert.Nil(t, savedValue)
 }
@@ -33,7 +34,7 @@ func TestGetOrCreate(t *testing.T) {
 		Code:        "FK",
 	}
 
-	savedValue := db.GetOrCreate(key, value)
+	savedValue := db.GetOrCreate(context.Background(), key, value)
 	assert.Equal(t, value, savedValue, "it's not equal")
 }
 
@@ -54,7 +55,8 @@ func TestUpdate(t *testing.T) {
 		Code:        "FK",
 	}
 
-	savedValue := db.GetOrCreate(key, value)
+	ctx := context.Background()
+	savedValue := db.GetOrCreate(ctx, key, value)
 	assert.Equal(t, value, savedValue, "it's not equal")
 
 	toUpdate := &rpc.Port{
@@ -62,7 +64,7 @@ func TestUpdate(t *testing.T) {
 		Code: "NOFK",
 	}
 
-	updated, err := db.Update(key, toUpdate)
+	updated, err := db.Update(ctx, key, toUpdate)
 	assert.Nil(t, err)
 	assert.Equal(t, updated.GetId(), key)
 	assert.Equal(t, updated.GetName(), savedValue.GetName())

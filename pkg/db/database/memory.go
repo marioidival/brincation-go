@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"sync"
 
 	rpc "github.com/marioidival/brincation-go/rpc"
@@ -17,7 +18,7 @@ func NewMemoryDatabase() *MemClient {
 	}
 }
 
-func (mem *MemClient) Get(key string) (*rpc.Port, error) {
+func (mem *MemClient) Get(ctx context.Context, key string) (*rpc.Port, error) {
 	mem.Lock()
 	defer mem.Unlock()
 	value, ok := mem.m[key]
@@ -27,7 +28,7 @@ func (mem *MemClient) Get(key string) (*rpc.Port, error) {
 	return value, nil
 }
 
-func (mem *MemClient) GetOrCreate(key string, value *rpc.Port) *rpc.Port {
+func (mem *MemClient) GetOrCreate(ctx context.Context, key string, value *rpc.Port) *rpc.Port {
 	mem.Lock()
 	defer mem.Unlock()
 	v, ok := mem.m[key]
@@ -38,8 +39,8 @@ func (mem *MemClient) GetOrCreate(key string, value *rpc.Port) *rpc.Port {
 	return v
 }
 
-func (mem *MemClient) Update(key string, updatedValue *rpc.Port) (*rpc.Port, error) {
-	currentValue, err := mem.Get(key)
+func (mem *MemClient) Update(ctx context.Context, key string, updatedValue *rpc.Port) (*rpc.Port, error) {
+	currentValue, err := mem.Get(ctx, key)
 	if err != nil {
 		return nil, err
 	}
