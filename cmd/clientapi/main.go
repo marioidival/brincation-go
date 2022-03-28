@@ -62,6 +62,19 @@ func run() error {
 
 	router := mux.NewRouter()
 	router.HandleFunc("/get-port/{id}", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		vars := mux.Vars(r)
+		port, err := client.GetPort(context.Background(), &rpc.PortId{
+			Id: strings.ToUpper(vars["id"]),
+		})
+		if err != nil {
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(rpc.Port{})
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(port)
 	}).Methods("GET")
 
 	server := &http.Server{
